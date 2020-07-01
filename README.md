@@ -1,2 +1,2 @@
-# Machine learning 
-### Here I store the code I write as I learn machine learning in MATLAB 
+## Machine learning 
+#### Here I store the code I write as I learn machine learning in MATLAB 
