@@ -1,2 +1,2 @@
 ## Machine learning 
-Here I store the code I write as I learn machine learning in MATLAB and Python
+This repo contains the code I wrote as I learned machine learning in MATLAB with Andrew Ng's Stanford Machine Learning course. 
