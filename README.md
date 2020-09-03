@@ -1,2 +1,2 @@
 ## Machine learning 
-This repo contains the code I write as I learn introductory machine learning concepts
+Some code written this summer as I explored machine learning, this repo needs updating
