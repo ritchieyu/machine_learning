@@ -1,0 +1,66 @@
+function [J grad] = nnCostFunction(nn_params, ...
+                                   input_layer_size, ...
+                                   hidden_layer_size, ...
+                                   num_labels, ...
+                                   X, y, lambda)
+                                   
+%NNCOSTFUNCTION Implements neural network cost function and regularized backpropagation for two layer
+%neural network which performs classification
+%   [J grad] = NNCOSTFUNCTON(nn_params, hidden_layer_size, num_labels, ...
+%   X, y, lambda) computes the cost and gradient of the neural network. The
+%   parameters for the neural network are "unrolled" into the vector
+%   nn_params and need to be converted back into the weight matrices. 
+
+% Reshape nn_params back into the parameters Theta1 and Theta2, the weight matrices for 2 layer neural network
+Theta1 = reshape(nn_params(1:hidden_layer_size * (input_layer_size + 1)), ...
+                 hidden_layer_size, (input_layer_size + 1));
+
+Theta2 = reshape(nn_params((1 + (hidden_layer_size * (input_layer_size + 1))):end), ...
+                 num_labels, (hidden_layer_size + 1));
+
+m = size(X, 1); % Number of training examples
+
+
+% Initializing and finding neuron values in each layer
+X = [ones(m, 1) X];
+
+hidden = [ones(1 , m) ; sigmoid(Theta1 * X')]; % 26 x m hidden matrix, each column vector is the hidden layer of 1 example
+
+output = sigmoid(Theta2 * hidden); % 10 x m hypothesis matrix, each column vector is the output of 1 example
+
+
+% Construct 10 x m y-matrix of only 1s and 0s
+% Columns are logical arrays labelling each training example's handwritten digit 
+y_mat = zeros(num_labels, m);
+
+for i = 1:m
+    y_mat(y(i), i) = 1;
+end 
+
+
+% Vectorized, regularized neural network cost function
+J_mat = -y_mat .* log(output) - (1-y_mat) .* log(1 - output);
+
+reg_theta1 = Theta1; reg_theta2 = Theta2;
+reg_theta1(:, 1) = 0; reg_theta2(:, 1) = 0;
+
+reg = lambda/(2*m) * (sum(reg_theta1.^2, 'all') + sum(reg_theta2.^2, 'all'));
+
+J = (1/m) * sum(J_mat, 'all') + reg;
+
+
+% Vectorized, regularized backpropagation
+delta_3 = output - y_mat; % 10 x m matrix, each column contains the delta_3 values for each training example
+delta_2 = (Theta2(:, 2:end)' * delta_3).*sigmoidGradient(Theta1 * X'); % 25 x m matrix, Theta1 * X' and delta_2 are 25 x m
+
+Theta2_grad = (1/m)*(delta_3 * hidden') + (lambda/m) * [zeros(size(Theta2, 1), 1) Theta2(:, 2:end)]; % 10 x 26 matrix of gradients
+Theta1_grad = (1/m)*(delta_2 * X) + (lambda/m) * [zeros(size(Theta1, 1), 1) Theta1(:, 2:end)]; % 25 x 401 matrix of gradients
+
+% Vectorization efficiently sums the gradients across training examples so a for loop is unnecessary
+% Theta gradients are used to make one gradient descent step
+
+% Unroll gradients for export to a gradient descent algorithm such as fminunc
+grad = [Theta1_grad(:) ; Theta2_grad(:)];
+
+
+end
